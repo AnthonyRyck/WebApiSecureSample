@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+
+WORKDIR /src
+
+COPY ["WebApiSecureSample/WebApiSecureSample.csproj", "WebApiSecureSample/"]
+
+RUN dotnet restore "WebApiSecureSample/WebApiSecureSample.csproj"
+
+COPY . .
+WORKDIR "/src/WebApiSecureSample"
+
+# FROM build AS publish
+RUN dotnet publish "WebApiSecureSample.csproj" -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim
+
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+EXPOSE 80
+ENTRYPOINT ["dotnet", "WebApiSecureSample.dll"]
